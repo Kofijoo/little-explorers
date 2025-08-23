@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+build/
+.vite/
+
+# logs / caches / OS
+*.log
+.DS_Store
+Thumbs.db
+
+# env
+.env
+.env.local
+.env.*.local
+
+# editors
+.vscode/
+
+# python venvs (if any)
+.venv/
+venv/
+
+# misc
+*.tmp

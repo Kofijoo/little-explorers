@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Explorers</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script>
+        // Basic error logging
+        window.onerror = function(msg, url, line) {
+            console.error(`Error: ${msg}\nURL: ${url}\nLine: ${line}`);
+            return false;
+        };
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <img
+                src="../assets/images/ui/logo.png"
+                alt="Little Explorers Logo"
+                onerror="this.onerror=null; this.src='../assets/images/fallback/placeholder.png';">
+            <div class="loading-bar"></div>
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading-indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        Loading resources...
+    </div>
+
+    <!-- Main Menu -->
+    <main id="main-menu" class="main-menu hidden">
+        <h1>Little Explorers</h1>
+        <nav class="menu-options">
+            <button id="start-game">Start Adventure</button>
+            <button id="select-character">Choose Character</button>
+            <button id="settings">Settings</button>
+        </nav>
+    </main>
+
+    <!-- Game Container -->
+    <main id="game-container" class="hidden">
+        <header id="app-header" class="app-header hidden">
+            <button id="back-btn" class="btn">← Back</button>
+            <div class="app-title">Little Explorers</div>
+            <div class="app-right">
+                <img id="selected-portrait" class="mini-portrait" alt="" />
+                <span id="selected-name" class="selected-name">No character</span>
+            </div>
+        </header>
+
+        <!-- Character selection -->
+        <div id="character-select" class="character-select">
+            <div class="character-option" data-character="leo">
+                <img src="../assets/images/characters/leo.png" class="character-portrait" alt="Leo">
+            </div>
+            <div class="character-option" data-character="ella">
+                <img src="../assets/images/characters/ella.png" class="character-portrait" alt="Ella">
+            </div>
+            <div class="character-option" data-character="pip">
+                <img src="../assets/images/characters/pip.png" class="character-portrait" alt="Pip">
+            </div>
+            <div class="character-option" data-character="gina">
+                <img src="../assets/images/characters/gina.png" class="character-portrait" alt="Gina">
+            </div>
+        </div>
+
+        <!-- Activity areas (moved background images to CSS classes) -->
+        <div id="activity-areas">
+            <div class="activity-area bg-discovery-zone" id="discovery-zone"></div>
+            <div class="activity-area bg-science-corner" id="science-corner"></div>
+            <div class="activity-area bg-nature-path" id="nature-path"></div>
+            <div class="activity-area bg-math-garden" id="math-garden"></div>
+        </div>
+    </main>
+
+    <div id="root"></div>
+
+    <!-- Script path relative to ui/ -->
+    <script src="./layout.js"></script>
+    <script>
+      // Hide the indicator only; fallbacks handled in layout.js
+      window.addEventListener('load', () => {
+        const ind = document.getElementById('loading-indicator');
+        if (ind) ind.style.display = 'none';
+      });
+  </script>
+</body>
+</html>
