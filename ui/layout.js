@@ -19,14 +19,19 @@
   };
 
   // ---- Fallback for all <img> elements
+  const PLACEHOLDER =
+    'data:image/svg+xml;utf8,' +
+    encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-family="Arial" font-size="14">image missing</text></svg>');
+
   function installImgFallbacks() {
-    const imgs = document.getElementsByTagName('img');
-    for (const img of imgs) {
-      img.addEventListener('error', () => {
-        console.error(`Failed to load image: ${img.src}`);
-        img.src = '../assets/images/fallback/placeholder.png';
-      }, { once: true });
-    }
+   const imgs = document.getElementsByTagName('img');
+   for (const img of imgs) {
+    img.addEventListener('error', () => {
+      console.error(`Failed to load image: ${img.src}`);
+      img.onerror = null;
+      img.src = PLACEHOLDER;
+    }, { once: true });
+   }
   }
 
   // ---- Log asset availability (non-blocking)
