@@ -2,9 +2,7 @@
 (() => {
   'use strict';
 
-  // ----------------------------
-  // Assets (filenames are case-exact)
-  // ----------------------------
+  // ---- Asset catalog (normalized filenames)
   const UI_ASSETS = {
     characters: {
       leo:  { portrait: '../assets/images/characters/leo.png',  fullBody: '../assets/images/characters/leo.png'  },
@@ -15,14 +13,12 @@
     backgrounds: {
       discoveryZone: '../assets/images/backgrounds/discovery-zone.png',
       scienceCorner: '../assets/images/backgrounds/science-corner.png',
-      naturePath:    '../assets/images/backgrounds/nature-explorers-path.png',
-      mathGarden:    '../assets/images/backgrounds/math-garden.png'
+      naturePath:   '../assets/images/backgrounds/nature-explorers-path.png',
+      mathGarden:   '../assets/images/backgrounds/math-garden.png'
     }
   };
 
-  // ----------------------------
-  // Fallbacks + diagnostics
-  // ----------------------------
+  // ---- Fallback for all <img> elements (data-URI placeholder, no extra file needed)
   const PLACEHOLDER =
     'data:image/svg+xml;utf8,' +
     encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="100%" height="100%" fill="#eee"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#888" font-family="Arial" font-size="14">image missing</text></svg>');
@@ -31,13 +27,14 @@
     const imgs = document.getElementsByTagName('img');
     for (const img of imgs) {
       img.addEventListener('error', () => {
-        console.error('Failed to load image:', img.src);
+        console.error(`Failed to load image: ${img.src}`);
         img.onerror = null;
         img.src = PLACEHOLDER;
       }, { once: true });
     }
   }
 
+  // ---- Log asset availability (non-blocking)
   function logMissingAssets() {
     const urls = [
       ...Object.values(UI_ASSETS.characters).flatMap(c => [c.portrait, c.fullBody]),
@@ -51,20 +48,63 @@
     });
   }
 
-  // ----------------------------
-  // Tiny DOM helpers
-  // ----------------------------
+  // ---- Tiny DOM helpers
   const $  = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const show = el => el && el.classList.remove('hidden');
   const hide = el => el && el.classList.add('hidden');
 
-  // Scenes available
   const SCENES = ['discovery-zone','science-corner','nature-path','math-garden'];
 
-  // ----------------------------
-  // Scene switching
-  // ----------------------------
+  // ---- Elements
+  const el = {
+    mainMenu: $('#main-menu'),
+    game: $('#game-container'),
+    charSelect: $('#character-select'),
+    activity: $('#activity-areas'),
+    startBtn: $('#start-game'),
+    selectBtn: $('#select-character'),
+    settingsBtn: $('#settings'),
+    loadingScreen: $('#loading-screen'),
+    loadingBar: document.querySelector('.loading-bar'),
+    loadingIndicator: $('#loading-indicator'),
+    header: $('#app-header'),
+    backBtn: $('#back-btn'),
+    selName: $('#selected-name'),
+    selPortrait: $('#selected-portrait'),
+    // Chat
+    toggleChatBtn: $('#toggle-chat'),
+    chatPanel: $('#chat-panel'),
+    chatLog: $('#chat-log'),
+    chatForm: $('#chat-form'),
+    chatInput: $('#chat-input'),
+  };
+
+  // ---- State
+  const state = {
+    view: 'menu',                 // 'menu' | 'character' | 'game'
+    character: null,              // 'leo' | 'ella' | 'pip' | 'gina' | null
+    activeScene: 'discovery-zone',
+    chatOpen: false,
+    chat: []                      // [{role:'user'|'bot', text:string}]
+  };
+
+  // ---- Header render
+  function renderHeader(){
+    const id = state.character;
+    if (!id || !UI_ASSETS.characters[id]) {
+      if (el.selName) el.selName.textContent = 'No character';
+      if (el.selPortrait) { el.selPortrait.style.display = 'none'; el.selPortrait.src = ''; }
+      return;
+    }
+    if (el.selName) el.selName.textContent = id.charAt(0).toUpperCase() + id.slice(1);
+    if (el.selPortrait) {
+      el.selPortrait.src = UI_ASSETS.characters[id].portrait;
+      el.selPortrait.style.display = 'inline-block';
+    }
+  }
+
+  // ---- Scene switching
   function setScene(id){
     if (!SCENES.includes(id)) id = 'discovery-zone';
     state.activeScene = id;
@@ -76,9 +116,7 @@
 
     // toggle switcher UI
     $$('.scene-switcher [data-scene]').forEach(b => {
-      const active = b.dataset.scene === id;
-      b.classList.toggle('active', active);
-      b.setAttribute('aria-selected', String(active));
+      b.classList.toggle('active', b.dataset.scene === id);
     });
 
     // persist + shallow routing
@@ -86,6 +124,12 @@
     const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
     hash.set('scene', id);
     history.replaceState(null, '', '#' + hash.toString());
+
+    // Announce in chat (non-intrusive)
+    if (state.chatOpen) {
+      addMsg('bot', sceneIntroText());
+      persistChat();
+    }
   }
 
   function bindSceneSwitcher(){
@@ -106,103 +150,129 @@
     setScene(initial);
   }
 
-  // ----------------------------
-  // Elements
-  // ----------------------------
-  const el = {
-    mainMenu: $('#main-menu'),
-    game: $('#game-container'),
-    charSelect: $('#character-select'),
-    activity: $('#activity-areas'),
-    startBtn: $('#start-game'),
-    selectBtn: $('#select-character'),
-    settingsBtn: $('#settings'),
-    loadingScreen: $('#loading-screen'),
-    loadingBar: document.querySelector('.loading-bar'),
-    loadingIndicator: $('#loading-indicator'),
-    header: $('#app-header'),
-    backBtn: $('#back-btn'),
-    selName: $('#selected-name'),
-    selPortrait: $('#selected-portrait'),
-    // Chat
-    toggleChat: $('#toggle-chat'),
-    chatPanel: $('#chat-panel'),
-    chatLog: $('#chat-log'),
-    chatForm: $('#chat-form'),
-    chatInput: $('#chat-input'),
-  };
-
-  // ----------------------------
-  // State
-  // ----------------------------
-  const state = {
-    view: 'menu',                 // 'menu' | 'character' | 'game'
-    character: null,              // 'leo' | 'ella' | 'pip' | 'gina' | null
-    activeScene: 'discovery-zone',
-    chatOpen: false,
-  };
-
-  // ----------------------------
-  // Header rendering
-  // ----------------------------
-  function renderHeader(){
-    const id = state.character;
-    if (!id || !UI_ASSETS.characters[id]) {
-      if (el.selName) el.selName.textContent = 'No character';
-      if (el.selPortrait) { el.selPortrait.style.display = 'none'; el.selPortrait.src = ''; }
-      return;
-    }
-    if (el.selName) el.selName.textContent = id.charAt(0).toUpperCase() + id.slice(1);
-    if (el.selPortrait) {
-      el.selPortrait.src = UI_ASSETS.characters[id].portrait;
-      el.selPortrait.style.display = 'inline-block';
-    }
-  }
-
-  // ----------------------------
-  // View switching
-  // ----------------------------
+  // ---- Views
   function setView(view) {
     state.view = view;
 
     if (view === 'menu') {
-      show(el.mainMenu); hide(el.game); hide(el.header);
-      hide(el.chatPanel);
+      show(el.mainMenu); hide(el.game);
+      hide(el.header);
     } else if (view === 'character') {
-      hide(el.mainMenu); show(el.game);
-      show(el.charSelect); hide(el.activity); show(el.header);
-      if (!state.chatOpen) hide(el.chatPanel);
+      hide(el.mainMenu);  show(el.game);
+      show(el.charSelect);  hide(el.activity);
+      show(el.header);
     } else if (view === 'game') {
-      hide(el.mainMenu); show(el.game);
-      hide(el.charSelect); show(el.activity); show(el.header);
+      hide(el.mainMenu);  show(el.game);
+      hide(el.charSelect);  show(el.activity);
+      show(el.header);
       setScene(state.activeScene);
-      if (state.chatOpen) show(el.chatPanel);
     } else {
       console.error('Unknown view:', view);
     }
     renderHeader();
   }
 
-  // ----------------------------
-  // Loading bar (simple)
-  // ----------------------------
+  // ---- Loading bar
   function startLoading() {
     if (!el.loadingBar) { setView('menu'); return; }
     let p = 0;
     const id = setInterval(() => {
       p = Math.min(100, p + 2);
-      el.loadingBar.style.width = p + '%'; // crude progress
+      el.loadingBar.style.width = p + '%';
       if (p >= 100) {
         clearInterval(id);
-        el.loadingScreen?.classList.add('hidden');
+        if (el.loadingScreen) el.loadingScreen.classList.add('hidden');
         setView('menu');
       }
     }, 30);
   }
 
-  // ----------------------------
-  // Base UI binds
-  // ----------------------------
+  // ---- Chat helpers
+  function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+
+  function sceneLabel(){
+    switch(state.activeScene){
+      case 'science-corner': return 'Science Corner';
+      case 'nature-path':    return 'Nature Path';
+      case 'math-garden':    return 'Math Garden';
+      default:               return 'Discovery Zone';
+    }
+  }
+
+  function sceneIntroText(){
+    const name = state.character ? cap(state.character) : 'Explorer';
+    return `You’re now in the ${sceneLabel()}, ${name}. What would you like to try here?`;
+  }
+
+  function addMsg(role, text){
+    if (!el.chatLog) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'msg ' + (role === 'user' ? 'user' : 'bot');
+
+    const who = document.createElement('div');
+    who.className = 'who';
+    who.textContent = role === 'user' ? 'You' : 'Guide';
+
+    const body = document.createElement('div');
+    body.className = 'text';
+    body.textContent = text;
+
+    wrap.appendChild(who);
+    wrap.appendChild(body);
+    el.chatLog.appendChild(wrap);
+    el.chatLog.scrollTop = el.chatLog.scrollHeight;
+
+    state.chat.push({ role, text });
+  }
+
+  function generateReply(userText){
+    const name = state.character ? cap(state.character) : 'Explorer';
+    const scene = sceneLabel();
+
+    // tiny heuristic “assistant”
+    const t = userText.toLowerCase();
+    if (t.includes('hello') || t.includes('hi')) {
+      return `Hi ${name}! Welcome to the ${scene}.`;
+    }
+    if (t.includes('help')) {
+      return `Here’s a tip: tap the scene tabs to switch areas. In ${scene}, try describing what you see.`;
+    }
+    if (t.includes('math')) {
+      return `In Math Garden, start with counting objects you can spot in the picture.`;
+    }
+    if (t.includes('science')) {
+      return `In Science Corner, try predicting what happens if we mix or move things around.`;
+    }
+    // default echo with context
+    return `Got it, ${name}. We’re in ${scene}. You said: “${userText}”.`;
+  }
+
+  function persistChat(){
+    try {
+      localStorage.setItem('le.chat', JSON.stringify(state.chat.slice(-100))); // cap length
+    } catch {}
+  }
+
+  function restoreChat(){
+    try {
+      const raw = localStorage.getItem('le.chat');
+      if (!raw) return;
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        arr.forEach(m => addMsg(m.role, m.text));
+      }
+    } catch {}
+  }
+
+  function openChat(open){
+    state.chatOpen = !!open;
+    if (!el.chatPanel || !el.toggleChatBtn) return;
+    el.chatPanel.classList.toggle('hidden', !open);
+    el.toggleChatBtn.setAttribute('aria-expanded', String(open));
+    if (open) setTimeout(() => el.chatInput?.focus(), 0);
+  }
+
+  // ---- Bind UI events
   function bindUI() {
     el.startBtn?.addEventListener('click', () => setView('game'));
     el.selectBtn?.addEventListener('click', () => setView('character'));
@@ -217,11 +287,10 @@
 
       const choose = () => {
         state.character = opt.dataset.character || null;
+        try { localStorage.setItem('le.character', state.character || ''); } catch {}
+        console.log('Character selected:', state.character);
         setView('game');
-        // greet in chat when chosen
-        if (state.chatOpen) {
-          appendBot(`Hi! I’m ${cap(state.character)}. Ask for an “activity idea” or switch scenes with the tabs.`);
-        }
+        if (state.chatOpen) { addMsg('bot', `Nice choice — ${cap(state.character)}!`); persistChat(); }
       };
 
       opt.addEventListener('click', choose);
@@ -234,126 +303,53 @@
     window.addEventListener('keydown', e => {
       if (e.key === 'Escape') setView('menu');
     });
-  }
 
-  // ----------------------------
-  // Chat helpers + bindings
-  // ----------------------------
-  function cap(s){ return s ? s[0].toUpperCase() + s.slice(1) : s; }
-  function escapeHTML(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    // Chat toggle
+    el.toggleChatBtn?.addEventListener('click', () => openChat(!state.chatOpen));
 
-  function elMsg(who, text){
-    const d = document.createElement('div');
-    d.className = 'msg ' + (who === 'you' ? 'user' : 'bot');
-    d.innerHTML = `<div class="who">${who === 'you' ? 'You' : (state.character ? cap(state.character) : 'Guide')}</div>
-                   <div class="text">${escapeHTML(text)}</div>`;
-    return d;
-  }
-
-  function appendUser(text){
-    if (!el.chatLog) return;
-    el.chatLog.appendChild(elMsg('you', text));
-    el.chatLog.scrollTop = el.chatLog.scrollHeight;
-  }
-
-  function appendBot(text){
-    if (!el.chatLog) return;
-    el.chatLog.appendChild(elMsg('bot', text));
-    el.chatLog.scrollTop = el.chatLog.scrollHeight;
-  }
-
-  // very small “bot”
-  function reply(text){
-    const who = cap(state.character) || 'Friend';
-    const scene = state.activeScene.replace('-', ' ');
-    const lower = text.trim().toLowerCase();
-
-    // navigate scenes by text
-    const toScene = {
-      discovery: 'discovery-zone',
-      science:   'science-corner',
-      nature:    'nature-path',
-      math:      'math-garden',
-    };
-    for (const key of Object.keys(toScene)){
-      if (lower.includes(key)) {
-        setScene(toScene[key]);
-        return `Okay! Switched to the ${toScene[key].replace('-', ' ')}.`;
-      }
-    }
-
-    if (!text.trim()) return `Say something like “What can I do here?”`;
-    if (/(hello|hi|hey)\b/.test(lower)) return `Hi! I’m ${who}. We’re in the ${scene}. Want an activity idea?`;
-
-    if (/what.*do|activity|idea/.test(lower)){
-      const ideas = {
-        'discovery-zone': `Find 3 shapes and name them.`,
-        'science-corner': `Guess which objects will sink or float, then test your guess!`,
-        'nature-path':    `Count 5 green things you can see.`,
-        'math-garden':    `Make 10 using two numbers in your head.`,
-      };
-      return ideas[state.activeScene] || `Explore and tell me what you notice.`;
-    }
-
-    if (/who.*you|name/.test(lower)) return `I’m ${who}, your helper. Pick a different buddy anytime from Character Select.`;
-    if (/help|stuck|hint/.test(lower)) return `Click another scene tab or ask me for an “activity idea”.`;
-
-    return `Nice! In the ${scene}, you can also ask for an “activity idea”, or say “go to nature / science / math / discovery”.`;
-  }
-
-  function bindChat(){
-    if (!el.toggleChat || !el.chatPanel) return;
-
-    const setOpen = (open) => {
-      state.chatOpen = open;
-      el.toggleChat.setAttribute('aria-expanded', String(open));
-      el.chatPanel.classList.toggle('hidden', !open);
-      if (open) el.chatInput?.focus();
-      try { localStorage.setItem('le.chatOpen', open ? '1' : '0'); } catch {}
-    };
-
-    el.toggleChat.addEventListener('click', () => setOpen(!state.chatOpen));
-
-    // restore persisted state
-    try { setOpen(localStorage.getItem('le.chatOpen') === '1'); } catch {}
-
-    // greet once on first open
-    if (state.chatOpen && el.chatLog && el.chatLog.children.length === 0) {
-      appendBot(`Hello! I’m ${cap(state.character) || 'your helper'}. Ask for an “activity idea” or switch scenes with the tabs.`);
-    }
-
-    // submit handler
-    el.chatForm?.addEventListener('submit', (e) => {
+    // Chat submit
+    el.chatForm?.addEventListener('submit', e => {
       e.preventDefault();
-      const text = el.chatInput.value;
-      if (!text.trim()) return;
-      appendUser(text);
+      const txt = el.chatInput?.value?.trim() || '';
+      if (!txt) return;
+      addMsg('user', txt);
       el.chatInput.value = '';
-      const r = reply(text);
-      appendBot(r);
+      persistChat();
+      setTimeout(() => {
+        const reply = generateReply(txt);
+        addMsg('bot', reply);
+        persistChat();
+      }, 250);
     });
   }
 
-  // ----------------------------
-  // Boot
-  // ----------------------------
+  function restoreCharacter(){
+    try {
+      const c = localStorage.getItem('le.character');
+      if (c) state.character = c;
+    } catch {}
+  }
+
+  // ---- Boot
   document.addEventListener('DOMContentLoaded', () => {
     installImgFallbacks();
     bindUI();
-    bindSceneSwitcher();
-    bootstrapSceneFromURL();
-    bindChat();
     startLoading();
-    el.loadingIndicator && (el.loadingIndicator.style.display = 'none');
+
+    if (el.loadingIndicator) el.loadingIndicator.style.display = 'none';
     logMissingAssets();
+
+    restoreCharacter();
     renderHeader();
 
-    // Debug / programmatic control
-    window.LE = {
-      state,
-      setView,
-      setScene,
-      send(text){ appendUser(text); appendBot(reply(text)); }
-    };
+    bindSceneSwitcher();
+    bootstrapSceneFromURL();
+
+    // Chat init
+    restoreChat();
+    openChat(false); // start closed by default
+
+    // Debug handle
+    window.LE = { state, setView, setScene, openChat };
   });
 })();
