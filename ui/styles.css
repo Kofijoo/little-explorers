@@ -1,164 +1,115 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    overflow: hidden;
+/* ===========================
+   Little Explorers — UI styles
+   File: ui/styles.css
+   =========================== */
+
+/* Base / reset */
+:root{
+  --brand: #4CAF50;
+  --brand-600: #3f9b45;
+  --ink: #1f2937;
+  --muted: #6b7280;
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --border: #e5e7eb;
+  --shadow: 0 4px 16px rgba(0,0,0,.12);
 }
 
-/* Loading Screen */
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--ink);
+  background: var(--bg);
+  overflow: hidden; /* the game container will scroll instead */
+}
+
+/* ---------------------------
+   Loading Screen
+---------------------------- */
 .loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #ffffff;
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
 }
 
 .loading-content {
-    text-align: center;
+  text-align: center;
+  width: 240px; /* ensures % width animations are predictable */
+}
+
+.loading-content img{
+  width: 140px;
+  height: auto;
+  display: block;
+  margin: 0 auto 14px;
 }
 
 .loading-bar {
-    width: 200px;
-    height: 20px;
-    background: #f0f0f0;
-    border-radius: 10px;
-    margin-top: 20px;
-    overflow: hidden;
+  width: 0%;                  /* JS ramps this from 0 → 100 */
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-600));
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+  transition: width .15s ease;
+  margin: 0 auto;
 }
 
-/* Main Menu */
+/* Fallback loading indicator (hidden on window load via JS) */
+#loading-indicator {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ---------------------------
+   Main Menu
+---------------------------- */
 .main-menu {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background: rgba(255, 255, 255, 0.9);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.9);
+  padding: 24px;
 }
 
 .menu-options {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
 }
 
 .menu-options button {
-    padding: 15px 30px;
-    font-size: 1.2em;
-    border-radius: 10px;
-    border: none;
-    background: #4CAF50;
-    color: white;
-    cursor: pointer;
-    transition: transform 0.2s;
+  padding: 14px 22px;
+  font-size: 1.05rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--brand);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter .12s ease;
 }
 
-.menu-options button:hover {
-    transform: scale(1.05);
+.menu-options button:hover { transform: translateY(-1px); }
+.menu-options button:active { transform: translateY(0); }
+.menu-options button:focus-visible{
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
 
-/* Base styles */
-.character-portrait {
-    width: 256px;
-    height: 256px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.background {
-    width: 1920px;
-    height: 1080px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 0;
-}
-
-.activity-area {
-    width: 1280px;
-    height: 720px;
-    position: relative;
-}
-
-.character-full {
-    height: 400px;
-    width: auto;
-    position: absolute;
-    bottom: 20px;
-}
-
-.achievement-badge {
-    width: 128px;
-    height: 128px;
-}
-
-.achievement-badge.large {
-    width: 256px;
-    height: 256px;
-}
-
-.popup-window {
-    width: 800px;
-    height: 600px;
-    background-size: cover;
-}
-
-.dialog-box {
-    width: 400px;
-    height: 300px;
-    background-size: contain;
-    background-repeat: no-repeat;
-}
-
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-/* --- Step 3 additions --- */
-
-/* Make the activity areas actually show their background images nicely */
-.activity-area {
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,.12);
-  margin: 12px 0;
-}
-
-/* Background image classes moved out of HTML */
-.bg-discovery-zone { background-image: url(../assets/images/backgrounds/discovery-zone.png); }
-.bg-science-corner { background-image: url(../assets/images/backgrounds/science-corner.png); }
-.bg-nature-path    { background-image: url(../assets/images/backgrounds/nature-explorers-path.png); }
-.bg-math-garden    { background-image: url(../assets/images/backgrounds/math-garden.png); }
-
-/* Character selection grid so portraits don’t stack on the left */
-.character-select{
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 24px;
-  align-items: start;
-  justify-items: center;
-  padding: 16px;
-}
-
-/* Keep your portrait size, just ensure it lays out nicely */
-.character-portrait{
-  display: block;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-/* Header bar */
+/* ---------------------------
+   App Header
+---------------------------- */
 .app-header{
   position: sticky;
   top: 0;
@@ -170,32 +121,117 @@ body {
   padding: 10px 14px;
   background: rgba(255,255,255,0.9);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid #eee;
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
   border-radius: 0 0 12px 12px;
 }
-.app-title{ font-weight: 700; }
-.app-right{ display: flex; align-items: center; gap: 8px; }
+
+.app-title{ 
+  font-weight: 700;
+  letter-spacing: .2px;
+}
+
+.app-right{ 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+}
+
 .mini-portrait{
-  width: 28px; height: 28px;
+  width: 28px; 
+  height: 28px;
   border-radius: 50%;
   object-fit: cover;
   display: none; /* shown when a character is chosen */
 }
-.selected-name{ font-size: 0.95rem; opacity: 0.8; }
 
-/* Simple button */
+.selected-name{ 
+  font-size: 0.95rem; 
+  color: var(--muted);
+}
+
+/* Scene switcher in header */
+.scene-switcher{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  max-width: min(58vw, 700px);
+  overflow: auto;
+  padding: 4px 0;
+}
+
+.scene-switcher .tab{
+  border: 1px solid var(--border);
+  background: #f7f7f7;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.scene-switcher .tab:hover{ filter: brightness(0.98); }
+
+.scene-switcher .tab.active{
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+}
+
+.scene-switcher .tab:focus-visible{
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ---------------------------
+   Buttons (general)
+---------------------------- */
 .btn{
-  border: none; border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 8px 12px;
-  background: #4CAF50; color: #fff;
+  background: var(--brand); 
+  color: #fff;
   cursor: pointer;
 }
+
 .btn:hover{ filter: brightness(1.05); }
+.btn:focus-visible{ outline: 2px solid #111; outline-offset: 2px; }
 
-/* Allow scrolling inside game container even if body is overflow:hidden */
-#game-container{ overflow: auto; }
+/* ---------------------------
+   Character selection
+---------------------------- */
+.character-select{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 24px;
+  align-items: start;
+  justify-items: center;
+  padding: 16px;
+}
 
-/* --- Step 6: Single active scene + switcher --- */
+.character-portrait{
+  width: 256px;
+  height: 256px;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: var(--shadow);
+  background: #fff;
+}
+
+/* ---------------------------
+   Game container
+---------------------------- */
+#game-container{ 
+  position: relative;
+  height: 100%;
+  overflow: auto; /* allow scrolling inside */
+  padding-bottom: 24px;
+}
+
+/* Scene wrapper */
 #activity-areas{
   position: relative;
   margin: 12px auto;
@@ -203,32 +239,136 @@ body {
   padding: 0 12px;
 }
 
-/* Hide all scenes by default; show only the active one */
+/* Base scene panel */
 .activity-area{
-  display: none;            /* overrides earlier block */
-  width: 100%;              /* responsive width */
+  display: none;            /* only the active one is shown */
+  width: 100%;
   height: auto;
-  aspect-ratio: 16 / 9;     /* replaces the fixed 1280x720 */
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  margin: 12px 0;
 }
+
 .activity-area.active{ display: block; }
 
-/* Scene switcher styles */
-.scene-switcher{
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
+/* Background image classes */
+.bg-discovery-zone { background-image: url(../assets/images/backgrounds/discovery-zone.png); }
+.bg-science-corner { background-image: url(../assets/images/backgrounds/science-corner.png); }
+.bg-nature-path    { background-image: url(../assets/images/backgrounds/nature-explorers-path.png); }
+.bg-math-garden    { background-image: url(../assets/images/backgrounds/math-garden.png); }
+
+/* ---------------------------
+   Misc element presets
+---------------------------- */
+.background {
+  width: 1920px;
+  height: 1080px;
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 0;
 }
-.scene-switcher .tab{
-  border: 1px solid #e5e5e5;
-  background: #f7f7f7;
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
+
+.character-full {
+  height: 400px;
+  width: auto;
+  position: absolute;
+  bottom: 20px;
 }
-.scene-switcher .tab.active{
-  background: #4CAF50;
-  color: #fff;
-  border-color: #4CAF50;
+
+.achievement-badge { width: 128px; height: 128px; }
+.achievement-badge.large { width: 256px; height: 256px; }
+
+.popup-window {
+  width: 800px;
+  height: 600px;
+  background-size: cover;
+}
+
+.dialog-box {
+  width: 400px;
+  height: 300px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* ---------------------------
+   Chat panel
+---------------------------- */
+.chat{
+  position: sticky;
+  bottom: 12px;
+  margin: 12px auto;
+  max-width: 1200px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.08);
+  overflow: hidden;
+}
+
+.chat-log{
+  max-height: 34vh;
+  overflow: auto;
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  background: #fafafa;
+}
+
+.msg{ 
+  display: inline-grid; 
+  gap: 4px; 
+  max-width: 70%; 
+  padding: 10px 12px; 
+  border-radius: 12px; 
+  line-height: 1.35;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+.msg .who{ font-size: .75rem; opacity: .7; }
+.msg.user{ justify-self: end; background: #e6f4ea; }
+.msg.bot{  justify-self: start; background: #eef2ff; }
+
+.chat-form{ 
+  display: flex; 
+  gap: 8px; 
+  padding: 10px; 
+  background: #fff; 
+  border-top: 1px solid var(--border); 
+}
+.chat-input{ 
+  flex: 1; 
+  padding: 10px 12px; 
+  border: 1px solid #ddd; 
+  border-radius: 8px; 
+}
+
+/* ---------------------------
+   Utilities
+---------------------------- */
+.hidden { display: none !important; }
+
+/* High-contrast / focus improvements */
+:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+
+/* ---------------------------
+   Responsive tweaks
+---------------------------- */
+@media (max-width: 640px){
+  .character-portrait{ width: 180px; height: 180px; }
+  .scene-switcher{ max-width: 100%; }
+  .app-header{ gap: 8px; }
+  .selected-name{ display: none; } /* save space on small screens */
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  * { animation: none !important; transition: none !important; }
 }

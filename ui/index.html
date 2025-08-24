@@ -1,97 +1,215 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Little Explorers</title>
-    <link rel="stylesheet" href="./styles.css">
-    <script>
-        // Basic error logging
-        window.onerror = function(msg, url, line) {
-            console.error(`Error: ${msg}\nURL: ${url}\nLine: ${line}`);
-            return false;
-        };
-    </script>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Little Explorers</title>
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Basic error logging -->
+  <script>
+    window.onerror = function (msg, url, line) {
+      console.error(`Error: ${msg}\nURL: ${url}\nLine: ${line}`);
+      return false;
+    };
+  </script>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-content">
-            <img
-                src="../assets/images/ui/logo.png"
-                alt="Little Explorers Logo"
-                onerror="this.onerror=null; this.src='../assets/images/fallback/placeholder.png';">
-            <div class="loading-bar"></div>
-        </div>
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <img
+        src="../assets/images/ui/logo.png"
+        alt="Little Explorers Logo"
+        onerror="this.onerror=null; this.src='../assets/images/fallback/placeholder.png';"
+      />
+      <div class="loading-bar"></div>
     </div>
+  </div>
 
-    <!-- Loading indicator -->
-    <div id="loading-indicator" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-        Loading resources...
-    </div>
+  <!-- Loading indicator (hidden on window load) -->
+  <div
+    id="loading-indicator"
+    style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+  >
+    Loading resources...
+  </div>
 
-    <!-- Main Menu -->
-    <main id="main-menu" class="main-menu hidden">
-        <h1>Little Explorers</h1>
-        <nav class="menu-options">
-            <button id="start-game">Start Adventure</button>
-            <button id="select-character">Choose Character</button>
-            <button id="settings">Settings</button>
-        </nav>
-    </main>
+  <!-- Main Menu -->
+  <main id="main-menu" class="main-menu hidden" role="main" aria-label="Main menu">
+    <h1>Little Explorers</h1>
+    <nav class="menu-options" aria-label="Primary">
+      <button id="start-game">Start Adventure</button>
+      <button id="select-character">Choose Character</button>
+      <button id="settings">Settings</button>
+    </nav>
+  </main>
 
-    <!-- Game Container -->
-    <main id="game-container" class="hidden">
-        <header id="app-header" class="app-header hidden">
-            <button id="back-btn" class="btn">← Back</button>
-            <div class="app-title">Little Explorers</div>
-            <div class="scene-switcher" role="tablist" aria-label="Scenes">
-                <button class="tab active" data-scene="discovery-zone">Discovery Zone</button>
-                <button class="tab" data-scene="science-corner">Science Corner</button>
-                <button class="tab" data-scene="nature-path">Nature Path</button>
-                <button class="tab" data-scene="math-garden">Math Garden</button>
-            </div>
-            <div class="app-right">
-                <img id="selected-portrait" class="mini-portrait" alt="" />
-                <span id="selected-name" class="selected-name">No character</span>
-            </div>
-        </header>
+  <!-- Game Container -->
+  <main id="game-container" class="hidden" aria-label="Game">
+    <header id="app-header" class="app-header hidden">
+      <button id="back-btn" class="btn" aria-label="Back to main menu">← Back</button>
 
-        <!-- Character selection -->
-        <div id="character-select" class="character-select">
-            <div class="character-option" data-character="leo">
-                <img src="../assets/images/characters/leo.png" class="character-portrait" alt="Leo">
-            </div>
-            <div class="character-option" data-character="ella">
-                <img src="../assets/images/characters/ella.png" class="character-portrait" alt="Ella">
-            </div>
-            <div class="character-option" data-character="pip">
-                <img src="../assets/images/characters/pip.png" class="character-portrait" alt="Pip">
-            </div>
-            <div class="character-option" data-character="gina">
-                <img src="../assets/images/characters/gina.png" class="character-portrait" alt="Gina">
-            </div>
-        </div>
+      <div class="app-title" aria-live="polite">Little Explorers</div>
 
-        <!-- Activity areas (moved background images to CSS classes) -->
-        <div id="activity-areas">
-            <div class="activity-area bg-discovery-zone" id="discovery-zone"></div>
-            <div class="activity-area bg-science-corner" id="science-corner"></div>
-            <div class="activity-area bg-nature-path" id="nature-path"></div>
-            <div class="activity-area bg-math-garden" id="math-garden"></div>
-        </div>
-    </main>
+      <!-- Scene Switcher -->
+      <div class="scene-switcher" role="tablist" aria-label="Scenes">
+        <button
+          class="tab active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="discovery-zone"
+          data-scene="discovery-zone"
+        >
+          Discovery Zone
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="science-corner"
+          data-scene="science-corner"
+        >
+          Science Corner
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="nature-path"
+          data-scene="nature-path"
+        >
+          Nature Path
+        </button>
+        <button
+          class="tab"
+          role="tab"
+          aria-selected="false"
+          aria-controls="math-garden"
+          data-scene="math-garden"
+        >
+          Math Garden
+        </button>
+      </div>
 
-    <div id="root"></div>
+      <!-- Chat toggle -->
+      <button
+        id="toggle-chat"
+        class="btn"
+        aria-expanded="false"
+        aria-controls="chat-panel"
+        title="Open chat"
+      >
+        Chat
+      </button>
 
-    <!-- Script path relative to ui/ -->
-    <script src="./layout.js"></script>
-    <script>
-      // Hide the indicator only; fallbacks handled in layout.js
-      window.addEventListener('load', () => {
-        const ind = document.getElementById('loading-indicator');
-        if (ind) ind.style.display = 'none';
-      });
+      <!-- Selected character summary -->
+      <div class="app-right">
+        <img id="selected-portrait" class="mini-portrait" alt="" />
+        <span id="selected-name" class="selected-name">No character</span>
+      </div>
+    </header>
+
+    <!-- Character selection -->
+    <section
+      id="character-select"
+      class="character-select"
+      aria-label="Choose a character"
+    >
+      <div class="character-option" data-character="leo">
+        <img
+          src="../assets/images/characters/leo.png"
+          class="character-portrait"
+          alt="Leo"
+        />
+      </div>
+      <div class="character-option" data-character="ella">
+        <img
+          src="../assets/images/characters/ella.png"
+          class="character-portrait"
+          alt="Ella"
+        />
+      </div>
+      <div class="character-option" data-character="pip">
+        <img
+          src="../assets/images/characters/pip.png"
+          class="character-portrait"
+          alt="Pip"
+        />
+      </div>
+      <div class="character-option" data-character="gina">
+        <img
+          src="../assets/images/characters/gina.png"
+          class="character-portrait"
+          alt="Gina"
+        />
+      </div>
+    </section>
+
+    <!-- Single Active Scene Container -->
+    <section id="activity-areas" aria-label="Activity area">
+      <div
+        class="activity-area bg-discovery-zone active"
+        id="discovery-zone"
+        role="tabpanel"
+        aria-labelledby="discovery-zone"
+      ></div>
+      <div
+        class="activity-area bg-science-corner"
+        id="science-corner"
+        role="tabpanel"
+        aria-labelledby="science-corner"
+      ></div>
+      <div
+        class="activity-area bg-nature-path"
+        id="nature-path"
+        role="tabpanel"
+        aria-labelledby="nature-path"
+      ></div>
+      <div
+        class="activity-area bg-math-garden"
+        id="math-garden"
+        role="tabpanel"
+        aria-labelledby="math-garden"
+      ></div>
+    </section>
+  </main>
+
+  <!-- Optional root (for future mounting) -->
+  <div id="root"></div>
+
+  <!-- Chat panel -->
+  <section id="chat-panel" class="chat hidden" aria-live="polite" aria-label="Assistant chat">
+    <div class="chat-log" id="chat-log" role="log" aria-label="Conversation"></div>
+    <form id="chat-form" class="chat-form" autocomplete="off">
+      <input
+        id="chat-input"
+        class="chat-input"
+        type="text"
+        placeholder="Ask something…"
+        aria-label="Message"
+      />
+      <button class="btn" type="submit">Send</button>
+    </form>
+  </section>
+
+  <noscript>
+    This app requires JavaScript to run.
+  </noscript>
+
+  <!-- App logic -->
+  <script src="./layout.js"></script>
+  <script>
+    // Hide the indicator only; fallbacks handled in layout.js
+    window.addEventListener("load", () => {
+      const ind = document.getElementById("loading-indicator");
+      if (ind) ind.style.display = "none";
+    });
   </script>
 </body>
 </html>
