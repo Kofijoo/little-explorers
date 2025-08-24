@@ -194,3 +194,41 @@ body {
 
 /* Allow scrolling inside game container even if body is overflow:hidden */
 #game-container{ overflow: auto; }
+
+/* --- Step 6: Single active scene + switcher --- */
+#activity-areas{
+  position: relative;
+  margin: 12px auto;
+  max-width: 1200px;
+  padding: 0 12px;
+}
+
+/* Hide all scenes by default; show only the active one */
+.activity-area{
+  display: none;            /* overrides earlier block */
+  width: 100%;              /* responsive width */
+  height: auto;
+  aspect-ratio: 16 / 9;     /* replaces the fixed 1280x720 */
+}
+.activity-area.active{ display: block; }
+
+/* Scene switcher styles */
+.scene-switcher{
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.scene-switcher .tab{
+  border: 1px solid #e5e5e5;
+  background: #f7f7f7;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.scene-switcher .tab.active{
+  background: #4CAF50;
+  color: #fff;
+  border-color: #4CAF50;
+}

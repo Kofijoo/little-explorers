@@ -48,6 +48,47 @@
   const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
   const show = el => el && el.classList.remove('hidden');
   const hide = el => el && el.classList.add('hidden');
+  const SCENES = ['discovery-zone','science-corner','nature-path','math-garden'];
+
+function setScene(id){
+  if (!SCENES.includes(id)) id = 'discovery-zone';
+  state.activeScene = id;
+
+  // toggle scene DOM
+  $$('#activity-areas .activity-area').forEach(a => {
+    a.classList.toggle('active', a.id === id);
+  });
+
+  // toggle switcher UI
+  $$('.scene-switcher [data-scene]').forEach(b => {
+    b.classList.toggle('active', b.dataset.scene === id);
+  });
+
+  // persist + shallow routing
+  try { localStorage.setItem('le.activeScene', id); } catch {}
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  hash.set('scene', id);
+  history.replaceState(null, '', '#' + hash.toString());
+}
+
+function bindSceneSwitcher(){
+  $$('.scene-switcher [data-scene]').forEach(btn => {
+    btn.addEventListener('click', () => setScene(btn.dataset.scene));
+  });
+}
+
+function bootstrapSceneFromURL(){
+  const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const fromHash = hash.get('scene');
+  let initial = 'discovery-zone';
+  try {
+    const fromStorage = localStorage.getItem('le.activeScene');
+    if (SCENES.includes(fromStorage)) initial = fromStorage;
+  } catch {}
+  if (SCENES.includes(fromHash)) initial = fromHash;
+  setScene(initial);
+}
+
 
   // ---- Elements
   const el = {
@@ -72,7 +113,9 @@
   const state = {
     view: 'menu',            // 'menu' | 'character' | 'game'
     character: null,         // 'leo' | 'ella' | 'pip' | 'gina' | null
+    activeScene: 'discovery-zone',   // NEW
   };
+
 
   function renderHeader(){
     const id = state.character;
@@ -102,6 +145,7 @@
       hide(el.mainMenu);  show(el.game);
       hide(el.charSelect);  show(el.activity);
       show(el.header);
+      setScene(state.activeScene);    // NEW
     } else {
       console.error('Unknown view:', view);
     }
@@ -163,6 +207,9 @@
     logMissingAssets();
     renderHeader();
     // Debug handle
-    window.LE = { state, setView };
+    bindSceneSwitcher();        // NEW
+    bootstrapSceneFromURL();    // NEW
+    window.LE = { state, setView, setScene }; // expose setScene too
+
   });
 })();
