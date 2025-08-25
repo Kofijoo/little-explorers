@@ -3,23 +3,21 @@
    File: ui/styles.css
    =========================== */
 
-/* Base / reset */
+/* --------- Design tokens --------- */
 :root{
   --brand: #4CAF50;
   --brand-600: #3f9b45;
-  --ink: #1f2937;
-  --muted: #6b7280;
-  --bg: #ffffff;
-  --panel: #ffffff;
-  --border: #e5e7eb;
+  --ink: #111827;            /* near-black text */
+  --muted: #6b7280;          /* subdued text */
+  --bg: #ffffff;             /* app background */
+  --panel: #ffffff;          /* card/panel background */
+  --border: #e5e7eb;         /* light border */
   --shadow: 0 4px 16px rgba(0,0,0,.12);
 }
 
 * { box-sizing: border-box; }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   margin: 0;
@@ -27,12 +25,12 @@ body {
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
   color: var(--ink);
   background: var(--bg);
-  overflow: hidden; /* the game container will scroll instead */
+  overflow: hidden; /* the game container scrolls; body does not */
 }
 
-/* ---------------------------
+/* =========================
    Loading Screen
----------------------------- */
+========================= */
 .loading-screen {
   position: fixed;
   inset: 0;
@@ -44,7 +42,7 @@ body {
 
 .loading-content {
   text-align: center;
-  width: 240px; /* ensures % width animations are predictable */
+  width: 240px; /* keeps progress bar width predictable */
 }
 
 .loading-content img{
@@ -55,7 +53,7 @@ body {
 }
 
 .loading-bar {
-  width: 0%;                  /* JS ramps this from 0 → 100 */
+  width: 0%;                  /* JS animates 0 → 100 */
   height: 14px;
   border-radius: 999px;
   background: linear-gradient(90deg, var(--brand), var(--brand-600));
@@ -70,9 +68,9 @@ body {
   color: var(--muted);
 }
 
-/* ---------------------------
+/* =========================
    Main Menu
----------------------------- */
+========================= */
 .main-menu {
   position: fixed;
   inset: 0;
@@ -107,9 +105,9 @@ body {
   outline-offset: 2px;
 }
 
-/* ---------------------------
+/* =========================
    App Header
----------------------------- */
+========================= */
 .app-header{
   position: sticky;
   top: 0;
@@ -184,9 +182,9 @@ body {
   outline-offset: 2px;
 }
 
-/* ---------------------------
+/* =========================
    Buttons (general)
----------------------------- */
+========================= */
 .btn{
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -199,9 +197,9 @@ body {
 .btn:hover{ filter: brightness(1.05); }
 .btn:focus-visible{ outline: 2px solid #111; outline-offset: 2px; }
 
-/* ---------------------------
+/* =========================
    Character selection
----------------------------- */
+========================= */
 .character-select{
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -221,9 +219,9 @@ body {
   background: #fff;
 }
 
-/* ---------------------------
+/* =========================
    Game container
----------------------------- */
+========================= */
 #game-container{ 
   position: relative;
   height: 100%;
@@ -255,15 +253,15 @@ body {
 
 .activity-area.active{ display: block; }
 
-/* Background image classes */
+/* Background image classes (paths are relative to /ui/) */
 .bg-discovery-zone { background-image: url(../assets/images/backgrounds/discovery-zone.png); }
 .bg-science-corner { background-image: url(../assets/images/backgrounds/science-corner.png); }
 .bg-nature-path    { background-image: url(../assets/images/backgrounds/nature-explorers-path.png); }
 .bg-math-garden    { background-image: url(../assets/images/backgrounds/math-garden.png); }
 
-/* ---------------------------
+/* =========================
    Misc element presets
----------------------------- */
+========================= */
 .background {
   width: 1920px;
   height: 1080px;
@@ -295,9 +293,9 @@ body {
   background-repeat: no-repeat;
 }
 
-/* ---------------------------
+/* =========================
    Chat panel
----------------------------- */
+========================= */
 .chat{
   position: sticky;
   bottom: 12px;
@@ -347,20 +345,23 @@ body {
   border-radius: 8px; 
 }
 
-/* ---------------------------
+/* =========================
    Utilities
----------------------------- */
+========================= */
 .hidden { display: none !important; }
 
-/* High-contrast / focus improvements */
-:focus-visible {
-  outline: 2px solid #111;
-  outline-offset: 2px;
+/* Screenreader-only helper (not currently used but handy) */
+.sr-only{
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
 }
 
-/* ---------------------------
+/* =========================
    Responsive tweaks
----------------------------- */
+========================= */
 @media (max-width: 640px){
   .character-portrait{ width: 180px; height: 180px; }
   .scene-switcher{ max-width: 100%; }

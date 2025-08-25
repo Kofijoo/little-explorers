@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,32 +7,37 @@
     content="width=device-width, initial-scale=1.0"
   />
   <title>Little Explorers</title>
-
-  <!-- App styles -->
+  <meta name="description" content="Little Explorers — a scene-based learning playground with character selection and a built-in chat guide." />
+  <link rel="icon" type="image/png" href="../assets/images/ui/logo.png" />
   <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Optional: provide a serverless proxy endpoint for LLM calls (do NOT put API keys in client code). -->
+  <!-- Example: <meta name="le-llm-proxy-url" content="https://your-worker-or-function.example.com/chat" /> -->
 
   <!-- Basic error logging -->
   <script>
     window.onerror = function (msg, url, line) {
-      console.error(`Error: ${msg}\nURL: ${url}\nLine: ${line}`);
+      console.error("Error:", msg, "\nURL:", url, "\nLine:", line);
       return false;
     };
   </script>
 </head>
 <body>
+  <a href="#main-menu" class="hidden" aria-hidden="true">Skip to menu</a>
+
   <!-- Loading Screen -->
-  <div id="loading-screen" class="loading-screen">
+  <div id="loading-screen" class="loading-screen" aria-live="polite" aria-busy="true">
     <div class="loading-content">
       <img
         src="../assets/images/ui/logo.png"
         alt="Little Explorers Logo"
         onerror="this.onerror=null; this.src='../assets/images/fallback/placeholder.png';"
       />
-      <div class="loading-bar"></div>
+      <div class="loading-bar" aria-label="Loading progress"></div>
     </div>
   </div>
 
-  <!-- Loading indicator (hidden on window load) -->
+  <!-- Fallback loading indicator (hidden on window load) -->
   <div
     id="loading-indicator"
     style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);"
@@ -40,148 +45,163 @@
     Loading resources...
   </div>
 
-  <!-- Main Menu -->
-  <main id="main-menu" class="main-menu hidden" role="main" aria-label="Main menu">
-    <h1>Little Explorers</h1>
-    <nav class="menu-options" aria-label="Primary">
-      <button id="start-game">Start Adventure</button>
-      <button id="select-character">Choose Character</button>
-      <button id="settings">Settings</button>
-    </nav>
-  </main>
+  <!-- Single page landmark -->
+  <main id="app" aria-label="Little Explorers application">
+    <!-- Main Menu -->
+    <section id="main-menu" class="main-menu hidden" role="region" aria-label="Main menu">
+      <h1>Little Explorers</h1>
+      <nav class="menu-options" aria-label="Primary actions">
+        <button id="start-game">Start Adventure</button>
+        <button id="select-character">Choose Character</button>
+        <button id="settings">Settings</button>
+      </nav>
+    </section>
 
-  <!-- Game Container -->
-  <main id="game-container" class="hidden" aria-label="Game">
-    <header id="app-header" class="app-header hidden">
-      <button id="back-btn" class="btn" aria-label="Back to main menu">← Back</button>
+    <!-- Game Container -->
+    <section id="game-container" class="hidden" aria-label="Game area">
+      <header id="app-header" class="app-header hidden">
+        <button id="back-btn" class="btn" aria-label="Back to main menu">← Back</button>
 
-      <div class="app-title" aria-live="polite">Little Explorers</div>
+        <div class="app-title" aria-live="polite">Little Explorers</div>
 
-      <!-- Scene Switcher -->
-      <div class="scene-switcher" role="tablist" aria-label="Scenes">
-        <button
-          class="tab active"
-          role="tab"
-          aria-selected="true"
-          aria-controls="discovery-zone"
-          data-scene="discovery-zone"
-        >
-          Discovery Zone
-        </button>
-        <button
-          class="tab"
-          role="tab"
-          aria-selected="false"
-          aria-controls="science-corner"
-          data-scene="science-corner"
-        >
-          Science Corner
-        </button>
-        <button
-          class="tab"
-          role="tab"
-          aria-selected="false"
-          aria-controls="nature-path"
-          data-scene="nature-path"
-        >
-          Nature Path
-        </button>
-        <button
-          class="tab"
-          role="tab"
-          aria-selected="false"
-          aria-controls="math-garden"
-          data-scene="math-garden"
-        >
-          Math Garden
-        </button>
-      </div>
+        <!-- Scene Switcher -->
+        <div class="scene-switcher" role="tablist" aria-label="Scenes">
+          <button
+            id="tab-discovery-zone"
+            class="tab active"
+            role="tab"
+            aria-selected="true"
+            aria-controls="discovery-zone"
+            data-scene="discovery-zone"
+            tabindex="0"
+          >
+            Discovery Zone
+          </button>
+          <button
+            id="tab-science-corner"
+            class="tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="science-corner"
+            data-scene="science-corner"
+            tabindex="-1"
+          >
+            Science Corner
+          </button>
+          <button
+            id="tab-nature-path"
+            class="tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="nature-path"
+            data-scene="nature-path"
+            tabindex="-1"
+          >
+            Nature Path
+          </button>
+          <button
+            id="tab-math-garden"
+            class="tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="math-garden"
+            data-scene="math-garden"
+            tabindex="-1"
+          >
+            Math Garden
+          </button>
+        </div>
 
-      <!-- Chat toggle -->
-      <button
-        id="toggle-chat"
-        class="btn"
-        aria-expanded="false"
-        aria-controls="chat-panel"
-        title="Open chat"
+        <!-- Chat toggle -->
+        <button
+          id="toggle-chat"
+          class="btn"
+          aria-expanded="false"
+          aria-controls="chat-panel"
+          title="Open chat"
+        >
+          Chat
+        </button>
+
+        <!-- Selected character summary -->
+        <div class="app-right">
+          <img id="selected-portrait" class="mini-portrait" alt="" />
+          <span id="selected-name" class="selected-name">No character</span>
+        </div>
+      </header>
+
+      <!-- Character selection -->
+      <section
+        id="character-select"
+        class="character-select"
+        aria-label="Choose a character"
       >
-        Chat
-      </button>
+        <div class="character-option" data-character="leo">
+          <img
+            src="../assets/images/characters/leo.png"
+            class="character-portrait"
+            alt="Leo"
+          />
+        </div>
+        <div class="character-option" data-character="ella">
+          <img
+            src="../assets/images/characters/ella.png"
+            class="character-portrait"
+            alt="Ella"
+          />
+        </div>
+        <div class="character-option" data-character="pip">
+          <img
+            src="../assets/images/characters/pip.png"
+            class="character-portrait"
+            alt="Pip"
+          />
+        </div>
+        <div class="character-option" data-character="gina">
+          <img
+            src="../assets/images/characters/gina.png"
+            class="character-portrait"
+            alt="Gina"
+          />
+        </div>
+      </section>
 
-      <!-- Selected character summary -->
-      <div class="app-right">
-        <img id="selected-portrait" class="mini-portrait" alt="" />
-        <span id="selected-name" class="selected-name">No character</span>
-      </div>
-    </header>
+      <!-- Single Active Scene Container -->
+      <section id="activity-areas" aria-label="Activity area">
+        <div
+          class="activity-area bg-discovery-zone active"
+          id="discovery-zone"
+          role="tabpanel"
+          aria-labelledby="tab-discovery-zone"
+          aria-hidden="false"
+        ></div>
 
-    <!-- Character selection -->
-    <section
-      id="character-select"
-      class="character-select"
-      aria-label="Choose a character"
-    >
-      <div class="character-option" data-character="leo">
-        <img
-          src="../assets/images/characters/leo.png"
-          class="character-portrait"
-          alt="Leo"
-        />
-      </div>
-      <div class="character-option" data-character="ella">
-        <img
-          src="../assets/images/characters/ella.png"
-          class="character-portrait"
-          alt="Ella"
-        />
-      </div>
-      <div class="character-option" data-character="pip">
-        <img
-          src="../assets/images/characters/pip.png"
-          class="character-portrait"
-          alt="Pip"
-        />
-      </div>
-      <div class="character-option" data-character="gina">
-        <img
-          src="../assets/images/characters/gina.png"
-          class="character-portrait"
-          alt="Gina"
-        />
-      </div>
-    </section>
+        <div
+          class="activity-area bg-science-corner"
+          id="science-corner"
+          role="tabpanel"
+          aria-labelledby="tab-science-corner"
+          aria-hidden="true"
+        ></div>
 
-    <!-- Single Active Scene Container -->
-    <section id="activity-areas" aria-label="Activity area">
-      <div
-        class="activity-area bg-discovery-zone active"
-        id="discovery-zone"
-        role="tabpanel"
-        aria-labelledby="discovery-zone"
-      ></div>
-      <div
-        class="activity-area bg-science-corner"
-        id="science-corner"
-        role="tabpanel"
-        aria-labelledby="science-corner"
-      ></div>
-      <div
-        class="activity-area bg-nature-path"
-        id="nature-path"
-        role="tabpanel"
-        aria-labelledby="nature-path"
-      ></div>
-      <div
-        class="activity-area bg-math-garden"
-        id="math-garden"
-        role="tabpanel"
-        aria-labelledby="math-garden"
-      ></div>
+        <div
+          class="activity-area bg-nature-path"
+          id="nature-path"
+          role="tabpanel"
+          aria-labelledby="tab-nature-path"
+          aria-hidden="true"
+        ></div>
+
+        <div
+          class="activity-area bg-math-garden"
+          id="math-garden"
+          role="tabpanel"
+          aria-labelledby="tab-math-garden"
+          aria-hidden="true"
+        ></div>
+      </section>
     </section>
   </main>
-
-  <!-- Optional root (for future mounting) -->
-  <div id="root"></div>
 
   <!-- Chat panel -->
   <section id="chat-panel" class="chat hidden" aria-live="polite" aria-label="Assistant chat">
@@ -198,14 +218,20 @@
     </form>
   </section>
 
-  <noscript>
-    This app requires JavaScript to run.
-  </noscript>
+  <noscript>This app requires JavaScript to run.</noscript>
 
   <!-- App logic -->
   <script src="./layout.js"></script>
   <script>
-    // Hide the indicator only; fallbacks handled in layout.js
+    // Expose optional config (reads proxy URL from meta if present)
+    (function () {
+      var m = document.querySelector('meta[name="le-llm-proxy-url"]');
+      window.LE_CONFIG = {
+        proxyUrl: m ? m.getAttribute('content') : ''
+      };
+    })();
+
+    // Hide the fallback indicator; layout.js controls the main loader
     window.addEventListener("load", () => {
       const ind = document.getElementById("loading-indicator");
       if (ind) ind.style.display = "none";
